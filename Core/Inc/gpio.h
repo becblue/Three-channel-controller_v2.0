@@ -33,12 +33,52 @@ extern "C" {
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
+// 通道使能状态枚举
+typedef enum {
+    CHANNEL_1 = 0,
+    CHANNEL_2,
+    CHANNEL_3
+} Channel_TypeDef;
+
+// 继电器状态枚举
+typedef enum {
+    RELAY_OFF = 0,
+    RELAY_ON
+} Relay_State_TypeDef;
+
+// 继电器控制枚举
+typedef enum {
+    RELAY_1_1 = 0,
+    RELAY_1_2,
+    RELAY_2_1,
+    RELAY_2_2,
+    RELAY_3_1,
+    RELAY_3_2
+} Relay_TypeDef;
 
 /* USER CODE END Private defines */
 
 void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+// GPIO状态读取函数
+uint8_t GPIO_ReadChannelEnable(Channel_TypeDef channel);
+uint8_t GPIO_ReadRelayStatus(Relay_TypeDef relay);
+uint8_t GPIO_ReadSwitchStatus(Channel_TypeDef channel);
+uint8_t GPIO_ReadDCStatus(void);
+uint8_t GPIO_ReadFanSensor(void);
+
+// GPIO状态设置函数
+void GPIO_SetRelayOn(Relay_TypeDef relay);
+void GPIO_SetRelayOff(Relay_TypeDef relay);
+void GPIO_SetAlarm(uint8_t state);
+void GPIO_SetBeep(uint8_t state);
+void GPIO_SetRS485DE(uint8_t state);
+
+// 引脚状态检测函数
+uint8_t GPIO_CheckChannelEnableStable(Channel_TypeDef channel, uint8_t expectedState, uint8_t checkTimes, uint32_t interval);
+uint8_t GPIO_CheckRelayStatusStable(Relay_TypeDef relay, uint8_t expectedState, uint8_t checkTimes, uint32_t interval);
+uint8_t GPIO_CheckSwitchStatusStable(Channel_TypeDef channel, uint8_t expectedState, uint8_t checkTimes, uint32_t interval);
 
 /* USER CODE END Prototypes */
 

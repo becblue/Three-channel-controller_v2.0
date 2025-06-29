@@ -51,7 +51,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+static uint32_t debug_test_counter = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,23 +94,30 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART3_UART_Init();  // 确保USART3最先初始化
-  Debug_Init();  // 初始化调试模块
-  
-  /* 输出系统时钟配置信息 */
-  Debug_Printf(DEBUG_INFO, "CLOCK", "System Clock: HSE=8MHz, SYSCLK=72MHz\r\n");
-  Debug_Printf(DEBUG_INFO, "CLOCK", "HCLK=72MHz, PCLK1=36MHz, PCLK2=72MHz\r\n");
-  
   MX_DMA_Init();
   MX_ADC1_Init();
-  MX_IWDG_Init();
-  MX_TIM3_Init();
   MX_I2C1_Init();
+  MX_IWDG_Init();
   MX_SPI2_Init();
+  MX_TIM3_Init();
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
+  
   /* USER CODE BEGIN 2 */
-
+  // 初始化调试模块（必须在USART3初始化之后）
+  Debug_Init();
+  
+  // 输出初始化完成信息
+  Debug_Printf(DEBUG_LEVEL_INFO, "系统初始化完成");
+  Debug_Printf(DEBUG_LEVEL_INFO, "开始进入主循环测试");
+  
+  // 测试GPIO状态读取
+  Debug_PrintGPIOStatus();
+  
+  // 测试继电器状态
+  Debug_PrintRelayStatus();
+  
+  uint32_t last_debug_time = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -120,6 +127,35 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    // 每5秒输出一次调试信息
+    if (HAL_GetTick() - last_debug_time >= 5000) {
+        last_debug_time = HAL_GetTick();
+        debug_test_counter++;
+        
+        Debug_Printf(DEBUG_LEVEL_DEBUG, "主循环运行中 - 计数: %lu", debug_test_counter);
+        
+        // 每10次循环输出一次详细状态
+        if (debug_test_counter % 10 == 0) {
+            Debug_Printf(DEBUG_LEVEL_INFO, "定期状态检查 - 第%lu次", debug_test_counter);
+            Debug_PrintGPIOStatus();
+        }
+        
+        // 测试不同级别的调试信息
+        if (debug_test_counter % 3 == 0) {
+            Debug_Printf(DEBUG_LEVEL_WARN, "这是一条警告信息测试");
+        }
+        
+        if (debug_test_counter % 7 == 0) {
+            Debug_Printf(DEBUG_LEVEL_ERROR, "这是一条错误信息测试");
+        }
+    }
+    
+    // 喂狗操作（每100ms执行一次）
+    static uint32_t last_wdt_time = 0;
+    if (HAL_GetTick() - last_wdt_time >= 100) {
+        last_wdt_time = HAL_GetTick();
+        HAL_IWDG_Refresh(&hiwdg);
+    }
   }
   /* USER CODE END 3 */
 }
@@ -183,9 +219,16 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+  
+  // 输出错误信息到调试串口
+  Debug_Printf(DEBUG_LEVEL_ERROR, "系统发生严重错误，进入错误处理程序");
+  Debug_Printf(DEBUG_LEVEL_ERROR, "系统将被挂起，请检查硬件连接和配置");
+  
   __disable_irq();
   while (1)
   {
+    // 在错误状态下闪烁报警LED（如果有的话）
+    HAL_Delay(500);
   }
   /* USER CODE END Error_Handler_Debug */
 }

@@ -40,5 +40,8 @@ three-channel controller_v2.0\main.o: ../Core/Inc/iwdg.h
 three-channel controller_v2.0\main.o: ../Core/Inc/spi.h
 three-channel controller_v2.0\main.o: ../Core/Inc/tim.h
 three-channel controller_v2.0\main.o: ../Core/Inc/usart.h
+three-channel controller_v2.0\main.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+three-channel controller_v2.0\main.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
+three-channel controller_v2.0\main.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 three-channel controller_v2.0\main.o: ../Core/Inc/gpio.h
 three-channel controller_v2.0\main.o: ../Core/Inc/debug.h
