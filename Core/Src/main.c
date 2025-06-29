@@ -26,6 +26,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "debug.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -93,6 +94,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART3_UART_Init();  // 确保USART3最先初始化
+  Debug_Init();  // 初始化调试模块
+  
+  /* 输出系统时钟配置信息 */
+  Debug_Printf(DEBUG_INFO, "CLOCK", "System Clock: HSE=8MHz, SYSCLK=72MHz\r\n");
+  Debug_Printf(DEBUG_INFO, "CLOCK", "HCLK=72MHz, PCLK1=36MHz, PCLK2=72MHz\r\n");
+  
   MX_DMA_Init();
   MX_ADC1_Init();
   MX_IWDG_Init();
