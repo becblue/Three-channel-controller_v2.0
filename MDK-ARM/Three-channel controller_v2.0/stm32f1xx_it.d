@@ -34,3 +34,4 @@ three-channel controller_v2.0\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/In
 three-channel controller_v2.0\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 three-channel controller_v2.0\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 three-channel controller_v2.0\stm32f1xx_it.o: ../Core/Inc/stm32f1xx_it.h
+three-channel controller_v2.0\stm32f1xx_it.o: ../Core/Inc/gpio.h

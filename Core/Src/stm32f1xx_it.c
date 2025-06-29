@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f1xx_it.h"
+#include "gpio.h"  // 添加gpio.h支持GPIO_InterruptHandler函数
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -363,5 +364,16 @@ void EXTI15_10_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+/**
+  * @brief GPIO外部中断回调函数
+  * @param GPIO_Pin 触发中断的引脚
+  * @retval None
+  */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    // 调用GPIO驱动中的中断处理函数
+    GPIO_InterruptHandler(GPIO_Pin);
+}
 
 /* USER CODE END 1 */

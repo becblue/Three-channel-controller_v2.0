@@ -30,7 +30,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "iwdg.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,7 +51,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-static uint32_t debug_test_counter = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -104,58 +103,151 @@ int main(void)
   MX_USART3_UART_Init();
   
   /* USER CODE BEGIN 2 */
-  // 初始化调试模块（必须在USART3初始化之后）
+  
+  // 首先初始化调试系统（必须在USART3初始化之后）
   Debug_Init();
   
-  // 输出初始化完成信息
-  Debug_Printf(DEBUG_LEVEL_INFO, "系统初始化完成");
-  Debug_Printf(DEBUG_LEVEL_INFO, "开始进入主循环测试");
+  // 输出系统启动信息
+  Debug_Printf(DEBUG_LEVEL_INFO, "=== 系统启动 ===");
+  Debug_Printf(DEBUG_LEVEL_INFO, "STM32F103RCT6 三通道高压切换箱控制系统");
+  Debug_Printf(DEBUG_LEVEL_INFO, "版本: v2.0");
+  Debug_Printf(DEBUG_LEVEL_INFO, "编译时间: %s %s", __DATE__, __TIME__);
   
-  // 测试GPIO状态读取
-  Debug_PrintGPIOStatus();
+  // 初始化GPIO功能模块 - 第二阶段第二步新增
+  Debug_Printf(DEBUG_LEVEL_INFO, "=== 初始化GPIO功能模块 ===");
   
-  // 测试继电器状态
-  Debug_PrintRelayStatus();
+  // 1. 继电器系统初始化
+  GPIO_RelayInitialize();
   
-  uint32_t last_debug_time = 0;
+  // 2. 中断系统初始化
+  GPIO_InterruptInit();
+  
+  // 3. 状态监控系统初始化
+  GPIO_StateMonitorInit();
+  
+  Debug_Printf(DEBUG_LEVEL_INFO, "GPIO功能模块初始化完成");
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  
+  uint32_t last_debug_time = 0;
+  uint32_t last_state_update_time = 0;
+  uint32_t loop_count = 0;
+  
+  Debug_Printf(DEBUG_LEVEL_INFO, "进入主循环，开始GPIO功能测试");
+  
+  // 添加继电器测试标志
+  uint8_t relay_test_completed = 0;
+  
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    // 每5秒输出一次调试信息
-    if (HAL_GetTick() - last_debug_time >= 5000) {
-        last_debug_time = HAL_GetTick();
-        debug_test_counter++;
+    
+    uint32_t current_time = HAL_GetTick();
+    
+    // 每100ms更新一次GPIO状态监控
+    if(current_time - last_state_update_time >= 100)
+    {
+        GPIO_StateMonitorUpdate();
         
-        Debug_Printf(DEBUG_LEVEL_DEBUG, "主循环运行中 - 计数: %lu", debug_test_counter);
-        
-        // 每10次循环输出一次详细状态
-        if (debug_test_counter % 10 == 0) {
-            Debug_Printf(DEBUG_LEVEL_INFO, "定期状态检查 - 第%lu次", debug_test_counter);
-            Debug_PrintGPIOStatus();
+        // 检查状态异常
+        if(GPIO_StateAnomalyCheck())
+        {
+            Debug_Printf(DEBUG_LEVEL_WARN, "检测到GPIO状态异常");
         }
         
-        // 测试不同级别的调试信息
-        if (debug_test_counter % 3 == 0) {
-            Debug_Printf(DEBUG_LEVEL_WARN, "这是一条警告信息测试");
-        }
-        
-        if (debug_test_counter % 7 == 0) {
-            Debug_Printf(DEBUG_LEVEL_ERROR, "这是一条错误信息测试");
-        }
+        last_state_update_time = current_time;
     }
     
-    // 喂狗操作（每100ms执行一次）
-    static uint32_t last_wdt_time = 0;
-    if (HAL_GetTick() - last_wdt_time >= 100) {
-        last_wdt_time = HAL_GetTick();
-        HAL_IWDG_Refresh(&hiwdg);
+    // 启动后10秒进行继电器测试（只执行一次）
+    if(!relay_test_completed && current_time >= 10000)
+    {
+        Debug_Printf(DEBUG_LEVEL_INFO, "=== 开始简化继电器测试 ===");
+        
+        // 快速测试三个通道的继电器（添加喂狗操作）
+        for(int i = 0; i < 3; i++)
+        {
+            Debug_Printf(DEBUG_LEVEL_INFO, "测试通道%d继电器", i + 1);
+            
+            // 喂狗操作，防止测试过程中复位
+            HAL_IWDG_Refresh(&hiwdg);
+            
+            // 测试继电器吸合
+            GPIO_RelayPulseControl((Channel_TypeDef)i, RELAY_ACTION_ON);
+            HAL_Delay(100);  // 短暂延时检查状态
+            
+            // 再次喂狗
+            HAL_IWDG_Refresh(&hiwdg);
+            
+            // 检查状态
+            uint8_t status = GPIO_RelayStatusCheck((Channel_TypeDef)i);
+            Debug_Printf(DEBUG_LEVEL_INFO, "  通道%d吸合测试结果: %s", i + 1, status ? "成功" : "失败");
+            
+            HAL_Delay(500);  // 间隔500ms
+            
+            // 喂狗操作
+            HAL_IWDG_Refresh(&hiwdg);
+            
+            // 测试继电器断开
+            GPIO_RelayPulseControl((Channel_TypeDef)i, RELAY_ACTION_OFF);
+            HAL_Delay(100);  // 短暂延时检查状态
+            
+            // 再次喂狗
+            HAL_IWDG_Refresh(&hiwdg);
+            
+            status = GPIO_RelayStatusCheck((Channel_TypeDef)i);
+            Debug_Printf(DEBUG_LEVEL_INFO, "  通道%d断开测试结果: %s", i + 1, status ? "失败" : "成功");
+            
+            HAL_Delay(500);  // 间隔500ms
+            
+            // 最后喂狗
+            HAL_IWDG_Refresh(&hiwdg);
+        }
+        
+        Debug_Printf(DEBUG_LEVEL_INFO, "=== 继电器测试完成 ===");
+        relay_test_completed = 1;
     }
+    
+    // 每5秒输出一次状态信息
+    if(current_time - last_debug_time >= 5000)
+    {
+        loop_count++;
+        Debug_Printf(DEBUG_LEVEL_INFO, "主循环计数: %lu", loop_count);
+        
+        // 每10次输出详细状态（即每50秒）
+        if(loop_count % 10 == 0)
+        {
+            Debug_Printf(DEBUG_LEVEL_INFO, "=== 详细状态报告 ===");
+            
+            // 输出GPIO状态
+            GPIO_StatePrint();
+            
+            // 输出中断状态
+            uint8_t channel_flags = GPIO_GetInterruptStatus(INTERRUPT_TYPE_CHANNEL_ENABLE);
+            uint8_t dc_flag = GPIO_GetInterruptStatus(INTERRUPT_TYPE_DC_CTRL);
+            uint8_t key_flags = GPIO_GetInterruptStatus(INTERRUPT_TYPE_KEY);
+            
+            Debug_Printf(DEBUG_LEVEL_INFO, "中断状态: 通道=0x%02X, DC=0x%02X, 按键=0x%02X", 
+                        channel_flags, dc_flag, key_flags);
+            
+            // 清除中断状态标志
+            GPIO_ClearInterruptStatus(INTERRUPT_TYPE_CHANNEL_ENABLE);
+            GPIO_ClearInterruptStatus(INTERRUPT_TYPE_DC_CTRL);
+            GPIO_ClearInterruptStatus(INTERRUPT_TYPE_KEY);
+        }
+        
+        last_debug_time = current_time;
+    }
+    
+    // 喂狗操作，防止看门狗复位
+    HAL_IWDG_Refresh(&hiwdg);
+    
+    // 短暂延时
+    HAL_Delay(10);
   }
   /* USER CODE END 3 */
 }
