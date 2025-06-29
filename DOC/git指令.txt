@@ -24,18 +24,32 @@ git revert（安全地后悔）
 然后输入git revert 黏贴刚刚复制的commit id
 输入:wq 按下回车
 
-
-git remote add origin https://github.com/becblue/01_Control_Handle_485_rx_1.git
-git push -u origin master
-
 要将项目回滚到特定的提交状态（e7321c40635d89199a799aa02dbe32eb92c2df46），您可以使用以下Git命令：
 
 # 方法1：使用git reset（会丢失当前未提交的更改）
 git reset --hard e7321c40635d89199a799aa02dbe32eb92c2df46
 
 
+创建本地仓库并推送至远程仓库方法：
+创建一个本次仓库
+git init
+
+在终端输入git add . 这个点(.)表示把所有文件都加入。就像是在说："把所有文件都摆好位置，准备拍照"。
+git add .
+
+在终端输入git commit -m "" 这就是正式拍照的时候！-m 后面写上这张"照片"的说明，比如：“完成代码”、“完成测试”
+git commit -m ""
+
+重命名本地分支名称
+git branch -M master
+
+关联本地仓库与远程仓库
+git remote add origin https://github.com/becblue/Three-channel-controller_v2.0.git
+
 推送当前项目到远程仓库（推送之前，系统需要检查本地版本是否比远程版本新）
-git push -u origin main
+git push -u origin master
+
+
 
 强制推动当前项目到远程仓库（不论是否远程比本地版本更新，也要推送）
 git push -f origin main
