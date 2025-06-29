@@ -45,3 +45,4 @@ three-channel controller_v2.0\main.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\
 three-channel controller_v2.0\main.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 three-channel controller_v2.0\main.o: ../Core/Inc/gpio.h
 three-channel controller_v2.0\main.o: ../Core/Inc/debug.h
+three-channel controller_v2.0\main.o: ../Core/Inc/relay_control.h

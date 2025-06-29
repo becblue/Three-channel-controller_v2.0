@@ -52,7 +52,9 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+#include "gpio.h"
+#include "relay_control.h"
+#include "usart.h"
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -372,8 +374,48 @@ void EXTI15_10_IRQHandler(void)
   */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-    // 调用GPIO驱动中的中断处理函数
+    // 调用GPIO驱动中的中断处理函数（用于防抖和状态记录）
     GPIO_InterruptHandler(GPIO_Pin);
+    
+    // 处理通道使能中断（继电器控制的核心逻辑）
+    switch(GPIO_Pin)
+    {
+        case K1_EN_Pin:
+            {
+                uint8_t enable_state = HAL_GPIO_ReadPin(K1_EN_GPIO_Port, K1_EN_Pin);
+                Relay_Control_ProcessChannelEnable(CHANNEL_1, enable_state);
+            }
+            break;
+            
+        case K2_EN_Pin:
+            {
+                uint8_t enable_state = HAL_GPIO_ReadPin(K2_EN_GPIO_Port, K2_EN_Pin);
+                Relay_Control_ProcessChannelEnable(CHANNEL_2, enable_state);
+            }
+            break;
+            
+        case K3_EN_Pin:
+            {
+                uint8_t enable_state = HAL_GPIO_ReadPin(K3_EN_GPIO_Port, K3_EN_Pin);
+                Relay_Control_ProcessChannelEnable(CHANNEL_3, enable_state);
+            }
+            break;
+            
+        case DC_CTRL_Pin:
+            // DC电源控制中断处理（暂时只记录）
+            Debug_Printf(DEBUG_LEVEL_INFO, "DC_CTRL中断触发");
+            break;
+            
+        case KEY1_Pin:
+        case KEY2_Pin:
+            // 按键中断处理（暂时只记录）
+            Debug_Printf(DEBUG_LEVEL_INFO, "按键中断触发: Pin=0x%04X", GPIO_Pin);
+            break;
+            
+        default:
+            Debug_Printf(DEBUG_LEVEL_WARN, "未知GPIO中断: Pin=0x%04X", GPIO_Pin);
+            break;
+    }
 }
 
 /* USER CODE END 1 */

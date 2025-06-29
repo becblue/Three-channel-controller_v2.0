@@ -2,6 +2,7 @@
 "three-channel controller_v2.0\startup_stm32f103xe.o"
 "three-channel controller_v2.0\main.o"
 "three-channel controller_v2.0\gpio.o"
+"three-channel controller_v2.0\relay_control.o"
 "three-channel controller_v2.0\adc.o"
 "three-channel controller_v2.0\dma.o"
 "three-channel controller_v2.0\i2c.o"

@@ -455,6 +455,11 @@
               </FileOption>
             </File>
             <File>
+              <FileName>relay_control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Core/Src/relay_control.c</FilePath>
+            </File>
+            <File>
               <FileName>adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/adc.c</FilePath>
